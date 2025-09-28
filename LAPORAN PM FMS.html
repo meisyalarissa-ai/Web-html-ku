@@ -1,0 +1,908 @@
+<!-- ========================================================================= -->
+<!-- PERHATIAN: ARTIFAK INI ADALAH VERSI FINAL DAN TERPROTEKSI DARI EDITING.  -->
+<!-- HARAP GUNAKAN UNTUK MENGISI DATA, PREVIEW, DAN EKSPOR SESUAI KEPERLUAN. -->
+<!-- ========================================================================= -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan FMS Mobile</title>
+    <!-- Memuat Tailwind CSS CDN untuk styling yang responsif dan modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #eef2f6; 
+        }
+        /* Style untuk status unit */
+        .status-standby-auto { background-color: #d1fae5; color: #065f46; }
+        .status-standby-on { background-color: #fef3c7; color: #b45309; }
+        .status-standby-off { background-color: #fee2e2; color: #991b1b; }
+        .status-on { background-color: #bfdbfe; color: #1e40af; }
+        .status-off { background-color: #e5e7eb; color: #4b5563; }
+        
+        .app-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .input-field {
+            padding: 12px; 
+            border-radius: 10px;
+        }
+        .file-entry {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="p-0 md:p-8 min-h-screen">
+
+    <div id="toast-message" class="fixed top-4 right-4 bg-green-500 text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300 z-50"></div>
+
+    <!-- Header App Bar Palsu (2 Baris) -->
+    <header class="bg-blue-600 p-4 shadow-lg sticky top-0 z-10 flex flex-col items-center">
+        <!-- Baris 1: Judul Utama, Besar, Tengah -->
+        <h1 class="text-3xl font-extrabold text-white text-center mb-1">Laporan PM FMS</h1>
+        
+        <!-- Baris 2: Credit, Kecil, Kanan Bawah Header -->
+        <div class="w-full flex justify-end">
+            <p class="text-xs text-white italic opacity-90">
+                Created by : mamang_admin
+            </p>
+        </div>
+    </header>
+
+    <!-- Konten Utama: Form Input -->
+    <div class="max-w-xl mx-auto p-4">
+        
+        <div class="bg-white app-card rounded-xl p-6 mt-4 mb-6">
+            
+            <!-- Perubahan: Judul baru, ukuran besar, dan di tengah -->
+            <h2 class="text-3xl font-extrabold text-blue-600 text-center mb-6">KOMANDO !!!</h2>
+            
+            <form id="report-form" class="space-y-4">
+
+                <!-- Tanggal, No. Urut, dan Nama Unit dalam 1 baris (Grid 1x3) -->
+                <div class="grid grid-cols-3 gap-2">
+                    <!-- 1. Input Tanggal -->
+                    <div>
+                        <label for="tanggal" class="block text-xs font-medium text-gray-700 mb-1">Tanggal</label>
+                        <input type="date" id="tanggal" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                    
+                    <!-- 2. No. Urut -->
+                    <div>
+                        <label for="no_urut" class="block text-xs font-medium text-gray-700 mb-1">No. Urut</label>
+                        <input type="text" id="no_urut" placeholder="A001" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                    
+                    <!-- 3. Nama Unit (dengan Opsi Ketik Manual) -->
+                    <div>
+                        <label for="nama_unit" class="block text-xs font-medium text-gray-700 mb-1">Nama Unit</label>
+                        <select id="nama_unit" required class="input-field w-full border border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500 text-sm">
+                            <option value="" disabled selected>Pilih Unit</option>
+                            <option value="TRA">TRA</option>
+                            <option value="OS">OS</option>
+                            <option value="ASGO">ASGO</option>
+                            <option value="DM">DM</option>
+                            <option value="DS">DS</option>
+                            <option value="TV">TV</option>
+                            <option value="MILLENIAL">MILLENIAL</option>
+                            <option value="CMD">CMD</option>
+                            <option value="GCO">GCO</option>
+                            <option value="MPR">MPR</option>
+                            <option value="GRV">GRV</option>
+                            <option value="FW">FW</option>
+                            <option value="JASMINE">JASMINE</option>
+                            <option value="MANUAL_INPUT">Lainnya (Ketik Manual)</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Input Teks Manual Nama Unit (Tersembunyi Awalnya) -->
+                <div id="nama_unit_manual_container" class="hidden mt-2">
+                    <label for="nama_unit_manual" class="block text-xs font-medium text-gray-700 mb-1">Ketik Nama Unit Lainnya</label>
+                    <input type="text" id="nama_unit_manual" placeholder="Contoh: UNIT-BOS" class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+
+                <!-- PIC (dengan Opsi Ketik Manual) -->
+                <div>
+                    <label for="pic" class="block text-xs font-medium text-gray-700 mb-1">PIC (Person In Charge)</label>
+                    <select id="pic" required class="input-field w-full border border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="" disabled selected>Pilih PIC</option>
+                        <option value="Ari">Ari</option>
+                        <option value="Iqbal">Iqbal</option>
+                        <option value="Restu">Restu</option>
+                        <option value="Aldi">Aldi</option>
+                        <option value="Nabil">Nabil</option>
+                        <option value="Rio">Rio</option>
+                        <option value="MANUAL_INPUT">Lainnya (Ketik Manual)</option>
+                    </select>
+                </div>
+                <!-- Input Teks Manual PIC (Tersembunyi Awalnya) -->
+                <div id="pic_manual_container" class="hidden mt-2">
+                    <label for="pic_manual" class="block text-xs font-medium text-gray-700 mb-1">Ketik Nama PIC Lainnya</label>
+                    <input type="text" id="pic_manual" placeholder="Contoh: Bayu" class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <!-- Status Unit -->
+                <div>
+                    <label for="status_unit" class="block text-xs font-medium text-gray-700 mb-1">Status Unit</label>
+                    <select id="status_unit" required class="input-field w-full border border-gray-300 bg-white focus:ring-blue-500 focus:border-blue-500">
+                        <option value="" disabled selected>Pilih Status</option>
+                        <option value="Standby auto">Standby Auto</option>
+                        <option value="Standby on">Standby On</option>
+                        <option value="Standby off">Standby Off</option>
+                        <option value="On">On</option>
+                        <option value="Off">Off</option>
+                    </select>
+                </div>
+
+                <!-- Data Teknis: Ampere (R/S/T), Tegangan, Suhu, Tekanan, Kapasitas Breaker (Grid 2x3) -->
+                <h3 class="text-sm font-semibold text-gray-600 pt-2 border-t mt-4">Data Pengukuran</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="ampere" class="block text-xs font-medium text-gray-700 mb-1">Ampere ( R/S/T)</label>
+                        <!-- PLACEHOLDER BARU -->
+                        <input type="text" id="ampere" placeholder="2.1/2.2/2.3 A" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="tegangan" class="block text-xs font-medium text-gray-700 mb-1">Voltage (V / VDC)</label>
+                        <input type="text" id="tegangan" placeholder="380V" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="suhu" class="block text-xs font-medium text-gray-700 mb-1">Suhu (°C)</label>
+                        <input type="number" id="suhu" step="0.1" placeholder="25.5" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="tekanan" class="block text-xs font-medium text-gray-700 mb-1">Pressure</label>
+                        <input type="text" id="tekanan" placeholder="5.0 Bar / 200 psi" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <!-- KOLOM BARU: Kapasitas Breaker -->
+                    <div class="col-span-2">
+                        <label for="kapasitas_breaker" class="block text-xs font-medium text-gray-700 mb-1">Kapasitas Breaker (A)</label>
+                        <input type="text" id="kapasitas_breaker" placeholder="Contoh: 100A / 150A" required class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Aksesoris Checkboxes (Diperbarui) -->
+                <div class="pt-2 border-t mt-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Aksesoris (Opsional)</label>
+                    <div id="aksesoris-list" class="grid grid-cols-3 gap-2 text-sm">
+                        <!-- Aksesoris Lama: PM, KWH, COS P, FAN -->
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="PM" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>PM</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="KWH" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>KWH</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="COS P" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>COS P</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="FAN" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>FAN</span>
+                        </label>
+                        
+                        <!-- Aksesoris BARU: Pb, SL, HZ, Ampere, Voltage -->
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="Pb" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>Pb</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="SL" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>SL</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="HZ" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>HZ</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="Ampere" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>Ampere</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" name="aksesoris" value="Voltage" class="rounded text-blue-600 focus:ring-blue-500">
+                            <span>Voltage</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- KOLOM: NOTE / TEMUAN (Opsional) -->
+                <div class="pt-2 border-t mt-4">
+                    <label for="note_temuan" class="block text-xs font-medium text-gray-700 mb-1">Note / Temuan (Opsional)</label>
+                    <textarea id="note_temuan" rows="3" placeholder="Contoh: Tekanan agak tinggi, perlu dicek besok pagi. Atau biarkan kosong." class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+
+                <!-- INPUT FOTO BARU -->
+                <div class="pt-2 border-t">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Daftar Foto Laporan (<span id="photo-count">0</span> file)</label>
+                    
+                    <!-- Input tersembunyi untuk memicu kamera/galeri -->
+                    <input type="file" id="foto-capture" accept="image/*" capture="camera" class="hidden" multiple>
+                    
+                    <button type="button" id="add-photo-button" class="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mb-3">
+                        <span class="flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2h-3.232a1 1 0 01-.707-.293L11.5 2h-3l-.5.5a1 1 0 01-.707.293H4zm7 9a3 3 0 11-6 0 3 3 0 016 0z" clip-rule="evenodd" />
+                            </svg>
+                            Tambah Foto / Ambil dari Kamera
+                        </span>
+                    </button>
+
+                    <!-- Daftar Pratinjau Foto yang telah Diambil -->
+                    <div id="photo-preview-list" class="space-y-2 text-xs">
+                        <!-- File yang diambil akan muncul di sini -->
+                        <p id="no-photo-message" class="text-center text-gray-500 italic">Belum ada foto yang diambil.</p>
+                    </div>
+                    
+                    <div id="foto-status" class="text-xs mt-2 text-gray-500"></div>
+                </div>
+
+                <button type="submit" id="submit-button" class="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300 disabled:bg-gray-400 mt-4">
+                    <span class="flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                        </svg>
+                        Simpan Laporan & Download Semua Foto
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Bagian Data Tersimpan -->
+    <div class="max-w-xl mx-auto p-4 pt-0">
+        <div class="bg-white p-4 rounded-xl shadow-md mb-4 space-y-3">
+            <div class="flex flex-wrap justify-between items-center">
+                 <h2 class="text-md font-bold text-gray-800">Riwayat Laporan (<span id="report-count">0</span>)</h2>
+                <button id="export-button" class="flex items-center space-x-1 py-2 px-3 bg-green-500 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-600 transition disabled:bg-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.62 10.22c.28-.28.53-.59.75-.92l.84-1.26a1.27 1.27 0 00-.32-1.74l-.94-.7a1.27 1.27 0 00-1.74-.32l-1.26.84a5.95 5.95 0 00-1.74.75l-4.24 4.24a3 3 0 000 4.24l.59.59a3 3 0 004.24 0l4.24-4.24zM6.4 12.8a.7.7 0 01.99 0L10 15.42a.7.7 0 010 .99l-.59.59a.7.7 0 01-.99 0L6.4 14.79a.7.7 0 010-.99zM8.5 10a.5.5 0 11-1 0 .5.5 0 011 0zM10 5a.5.5 0 110-1 .5.5 0 010 1z"/>
+                    </svg>
+                    <span>Kirim ke Mamang Admin</span>
+                </button>
+            </div>
+
+            <!-- Kotak Pencarian -->
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="Cari berdasarkan No. Urut, Nama Unit, PIC, atau Temuan..." class="input-field w-full border border-gray-300 focus:ring-blue-500 focus:border-blue-500 pl-10" oninput="filterReports()">
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            
+            <!-- Batch Deletion Buttons -->
+            <div class="flex justify-start space-x-2 pt-2 border-t">
+                <button id="delete-filtered-button" class="flex items-center space-x-1 py-2 px-3 bg-red-500 text-white text-xs font-semibold rounded-lg shadow-md hover:bg-red-600 transition disabled:bg-gray-400">
+                    Hapus Data Terfilter (<span id="filtered-count">0</span>)
+                </button>
+                <button id="delete-all-button" class="flex items-center space-x-1 py-2 px-3 bg-gray-500 text-white text-xs font-semibold rounded-lg shadow-md hover:bg-gray-600 transition disabled:bg-gray-400">
+                    Hapus Semua Data
+                </button>
+            </div>
+        </div>
+
+        
+        <div id="report-list" class="report-container space-y-3 max-h-[50vh] overflow-y-auto pb-4">
+            <!-- Laporan akan dimuat di sini -->
+            <p id="no-data-message" class="text-center text-gray-500 text-sm p-4 bg-white rounded-xl app-card">Belum ada data laporan tersimpan secara offline.</p>
+            <p id="no-search-results" class="text-center text-red-500 text-sm p-4 bg-white rounded-xl app-card hidden">Tidak ditemukan laporan sesuai kriteria pencarian.</p>
+        </div>
+    </div>
+    
+    <script>
+        const STORAGE_KEY = 'fms_preventive_reports_v3'; 
+        const MAX_FILE_SIZE_BYTES = 500 * 1024; 
+        const WHATSAPP_NUMBER = '6287829023344'; 
+
+        const form = document.getElementById('report-form');
+        const reportList = document.getElementById('report-list');
+        const exportButton = document.getElementById('export-button');
+        const reportCount = document.getElementById('report-count');
+        const filteredCount = document.getElementById('filtered-count');
+        const noDataMessage = document.getElementById('no-data-message');
+        const noSearchResults = document.getElementById('no-search-results');
+        const submitButton = document.getElementById('submit-button');
+        const fotoStatus = document.getElementById('foto-status');
+        const fotoCaptureInput = document.getElementById('foto-capture'); 
+        const addPhotoButton = document.getElementById('add-photo-button');
+        const photoPreviewList = document.getElementById('photo-preview-list');
+        const photoCountDisplay = document.getElementById('photo-count');
+        const noPhotoMessage = document.getElementById('no-photo-message');
+        const searchInput = document.getElementById('search-input');
+        const deleteAllButton = document.getElementById('delete-all-button');
+        const deleteFilteredButton = document.getElementById('delete-filtered-button');
+        
+        // Elemen input manual baru
+        const namaUnitSelect = document.getElementById('nama_unit');
+        const namaUnitManualContainer = document.getElementById('nama_unit_manual_container');
+        const namaUnitManualInput = document.getElementById('nama_unit_manual');
+        const picSelect = document.getElementById('pic');
+        const picManualContainer = document.getElementById('pic_manual_container');
+        const picManualInput = document.getElementById('pic_manual');
+        
+        let currentFilteredIDs = []; 
+        let capturedFiles = []; 
+
+        // --- EVENT HANDLERS UNTUK INPUT MANUAL ---
+        
+        namaUnitSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'MANUAL_INPUT') {
+                namaUnitManualContainer.classList.remove('hidden');
+                namaUnitManualInput.setAttribute('required', 'required');
+                namaUnitSelect.removeAttribute('required'); // Nonaktifkan required di select
+            } else {
+                namaUnitManualContainer.classList.add('hidden');
+                namaUnitManualInput.removeAttribute('required');
+                namaUnitSelect.setAttribute('required', 'required'); // Aktifkan required di select
+            }
+        });
+
+        picSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'MANUAL_INPUT') {
+                picManualContainer.classList.remove('hidden');
+                picManualInput.setAttribute('required', 'required');
+                picSelect.removeAttribute('required'); // Nonaktifkan required di select
+            } else {
+                picManualContainer.classList.add('hidden');
+                picManualInput.removeAttribute('required');
+                picSelect.setAttribute('required', 'required'); // Aktifkan required di select
+            }
+        });
+
+        /** Mendapatkan nilai akhir untuk Nama Unit (dari select atau input manual) */
+        function getNamaUnitValue() {
+            if (namaUnitSelect.value === 'MANUAL_INPUT') {
+                return namaUnitManualInput.value.trim();
+            }
+            return namaUnitSelect.value;
+        }
+
+        /** Mendapatkan nilai akhir untuk PIC (dari select atau input manual) */
+        function getPicValue() {
+            if (picSelect.value === 'MANUAL_INPUT') {
+                return picManualInput.value.trim();
+            }
+            return picSelect.value;
+        }
+
+
+        // --- UTILITY FUNCTIONS ---
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.className = `fixed top-4 right-4 p-3 rounded-lg shadow-xl transition-opacity duration-300 z-50 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white`;
+            toast.style.opacity = '1';
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 4000); 
+        }
+        
+        // FUNGSI KONFIRMASI KUSTOM DENGAN PESAN BARU
+        function safeConfirm(messageDetail) {
+            const expectedResponse = 'YA';
+            const userPrompt = "Yakin bey mau di hapus ???"; // Pesan kustom dari user
+            
+            // Gabungkan pesan kustom dengan detail dan instruksi konfirmasi
+            const fullMessage = `${userPrompt}\n\nDetail Penghapusan: ${messageDetail}\n(Ketik '${expectedResponse}' untuk melanjutkan penghapusan.)`;
+            
+            const response = window.prompt(fullMessage);
+            return response && response.toUpperCase() === expectedResponse;
+        }
+
+        function getReports() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error("Gagal memuat data dari localStorage:", e);
+                return [];
+            }
+        }
+
+        function saveReports(reports) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+                filterReports(); 
+            } catch (e) {
+                console.error("Gagal menyimpan data ke localStorage:", e);
+                showToast("Error: Gagal menyimpan data (memori penuh?).", true);
+            }
+        }
+
+        function getSelectedAccessories() {
+            const checkboxes = document.querySelectorAll('input[name="aksesoris"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+        
+        function base64ToSize(base64) {
+            const base64Data = base64.split(',')[1];
+            if (!base64Data) return 0;
+            // Perkiraan ukuran byte: (Panjang base64 * 3 / 4)
+            return Math.ceil((base64Data.length * 3) / 4);
+        }
+
+        // --- LOGIKA FOTO SEQUENTIAL ---
+
+        /** Memperbarui tampilan daftar file yang telah diambil */
+        function updatePhotoPreview() {
+            photoPreviewList.innerHTML = '';
+            photoCountDisplay.textContent = capturedFiles.length;
+            
+            if (capturedFiles.length === 0) {
+                noPhotoMessage.classList.remove('hidden');
+                photoPreviewList.appendChild(noPhotoMessage);
+                return;
+            } else {
+                noPhotoMessage.classList.add('hidden');
+            }
+
+            capturedFiles.forEach((file, index) => {
+                const element = document.createElement('div');
+                element.className = 'file-entry text-gray-700';
+                element.innerHTML = `
+                    <span class="font-medium">Foto ${index + 1}:</span> ${file.name || 'Tangkapan Kamera'} 
+                    <button type="button" data-index="${index}" class="remove-photo-btn text-red-500 hover:text-red-700 font-medium text-xs py-1 px-2 rounded-lg transition">
+                        Hapus
+                    </button>
+                `;
+                photoPreviewList.appendChild(element);
+            });
+
+            document.querySelectorAll('.remove-photo-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.dataset.index);
+                    removePhoto(index);
+                });
+            });
+        }
+        
+        /** Menghapus foto dari daftar sementara */
+        function removePhoto(index) {
+            if (index > -1 && index < capturedFiles.length) {
+                capturedFiles.splice(index, 1);
+                updatePhotoPreview();
+                showToast(`Foto ${index + 1} dihapus.`);
+            }
+        }
+
+        // Event listener untuk tombol "Tambah Foto"
+        addPhotoButton.addEventListener('click', () => {
+            // Memicu input file yang tersembunyi
+            fotoCaptureInput.click(); 
+        });
+
+        // Event listener saat file terpilih/tertangkap dari kamera
+        fotoCaptureInput.addEventListener('change', function(event) {
+            if (this.files && this.files.length > 0) {
+                // Tambahkan file ke array sementara
+                for (const file of this.files) {
+                    capturedFiles.push(file);
+                }
+                updatePhotoPreview();
+                showToast(`Berhasil menambah ${this.files.length} foto.`);
+            }
+            // Kosongkan input agar event 'change' bisa terpicu lagi jika file yang sama diambil/dipilih
+            this.value = null; 
+        });
+
+        // --- LOGIKA KOMPRESI & SUBMIT ---
+
+        async function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Resize ke dimensi maksimal
+                        const MAX_DIM = 1200;
+                        if (width > MAX_DIM || height > MAX_DIM) {
+                            if (width > height) {
+                                height = Math.round(height * (MAX_DIM / width));
+                                width = MAX_DIM;
+                            } else {
+                                width = Math.round(width * (MAX_DIM / height));
+                                height = MAX_DIM;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        let quality = 0.8;
+                        let compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+                        let size = base64ToSize(compressedDataURL);
+                        
+                        let attempts = 0;
+                        const MAX_ATTEMPTS = 15;
+
+                        // Loop kompresi jika ukuran masih terlalu besar
+                        while (size > MAX_FILE_SIZE_BYTES && quality > 0.1 && attempts < MAX_ATTEMPTS) {
+                            quality = Math.max(0.1, quality - 0.05);
+                            compressedDataURL = canvas.toDataURL('image/jpeg', quality);
+                            size = base64ToSize(compressedDataURL);
+                            attempts++;
+                            
+                            // Feedback status kompresi
+                            fotoStatus.textContent = `Compressing file... ${(size / 1024).toFixed(1)} KB (Q: ${Math.round(quality * 100)}%)`;
+                        }
+
+                        fotoStatus.textContent = `Compression done! Size: ${(size / 1024).toFixed(1)} KB.`;
+                        
+                        resolve({ dataUrl: compressedDataURL, size: (size / 1024).toFixed(1) });
+                    };
+                    img.onerror = () => reject("Failed to load image.");
+                    img.src = event.target.result;
+                };
+                reader.onerror = () => reject("Failed to read file.");
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function downloadBase64File(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const noUrut = document.getElementById('no_urut').value.trim();
+            const namaUnit = getNamaUnitValue(); // Ambil nilai Nama Unit
+            const pic = getPicValue(); // Ambil nilai PIC
+            
+            if (!noUrut || !namaUnit || !pic) {
+                 showToast("No. Urut, Nama Unit, dan PIC wajib diisi.", true);
+                 return;
+            }
+
+            if (capturedFiles.length === 0) {
+                showToast("Mohon ambil minimal satu foto.", true);
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"></svg>Memproses 0/${capturedFiles.length} Foto...</span>`;
+            
+            // Sanitasi nama untuk nama file
+            const sanitizedNoUrut = noUrut.replace(/[^a-zA-Z0-9-]/g, '_');
+            const sanitizedNamaUnit = namaUnit.replace(/[^a-zA-Z0-9-]/g, '_');
+            
+            let photoDetails = [];
+            let totalCompressed = 0;
+
+            for (let i = 0; i < capturedFiles.length; i++) {
+                const file = capturedFiles[i];
+                submitButton.innerHTML = `<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"></svg>Memproses ${i + 1}/${capturedFiles.length} Foto...</span>`;
+                
+                try {
+                    const compressed = await compressImage(file);
+                    
+                    // L O G I K A   P E N A M A A N   F I L E   B A R U
+                    // Penamaan: [No. Urut]_[Nama Unit]_[No. Urutan].jpeg
+                    const safeFileName = `${sanitizedNoUrut}_${sanitizedNamaUnit}_${i + 1}.jpeg`;
+                    
+                    // 1. Memicu unduhan foto
+                    downloadBase64File(compressed.dataUrl, safeFileName);
+                    
+                    photoDetails.push({
+                        filename: safeFileName,
+                        size_kb: compressed.size
+                    });
+                    totalCompressed++;
+
+                } catch (error) {
+                    showToast(`Error pada foto ${i + 1}: ${error}`, true);
+                    console.error("Compression Error:", error);
+                }
+            }
+            
+            if (totalCompressed > 0) {
+                 showToast(`Berhasil menyimpan ${totalCompressed} foto ke folder Downloads. Penamaan: [No. Urut]_[Nama Unit]_[No. Urutan].jpeg`);
+            } else {
+                 showToast("Gagal memproses semua foto.", true);
+            }
+
+            // 2. Simpan data laporan non-foto ke localStorage
+            const newReport = {
+                id: Date.now(),
+                tanggal: document.getElementById('tanggal').value,
+                no_urut: noUrut,
+                nama_unit: namaUnit, 
+                pic: pic, // Simpan nilai PIC
+                ampere: document.getElementById('ampere').value,
+                tegangan: document.getElementById('tegangan').value,
+                suhu: document.getElementById('suhu').value,
+                tekanan: document.getElementById('tekanan').value, // Nilai Tekanan (Text)
+                kapasitas_breaker: document.getElementById('kapasitas_breaker').value, // Nilai Kapasitas Breaker
+                status_unit: document.getElementById('status_unit').value,
+                aksesoris: getSelectedAccessories(), 
+                note_temuan: document.getElementById('note_temuan').value.trim(), 
+                foto_details: photoDetails, 
+                timestamp_simpan: new Date().toISOString()
+            };
+
+            const reports = getReports();
+            reports.unshift(newReport); 
+
+            saveReports(reports);
+
+            // Reset form, status, dan array foto
+            form.reset();
+            document.getElementById('tanggal').valueAsDate = new Date(); 
+            capturedFiles = []; // KOSONGKAN ARRAY FOTO SETELAH DISIMPAN
+            updatePhotoPreview();
+            fotoStatus.textContent = '';
+            
+            // Sembunyikan dan nonaktifkan input manual setelah reset
+            namaUnitManualContainer.classList.add('hidden');
+            namaUnitManualInput.removeAttribute('required');
+            picManualContainer.classList.add('hidden');
+            picManualInput.removeAttribute('required');
+
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<span class="flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>Simpan Laporan & Download Semua Foto</span>';
+        });
+
+        // --- LOGIKA RIWAYAT LAPORAN ---
+
+        function deleteReport(id) {
+            // Menggunakan pesan kustom untuk penghapusan satu laporan
+            if (safeConfirm(`Laporan ID: ${id}`)) {
+                const reports = getReports();
+                const filteredReports = reports.filter(report => report.id !== id);
+                if (filteredReports.length < reports.length) {
+                    saveReports(filteredReports);
+                    showToast("Laporan berhasil dihapus.");
+                } else {
+                    showToast("Gagal menghapus laporan.", true);
+                }
+            } else {
+                showToast("Penghapusan dibatalkan.", true);
+            }
+        }
+        
+        function deleteAllReports() {
+            if (getReports().length === 0) {
+                 showToast("Tidak ada data untuk dihapus.", true);
+                 return;
+            }
+            // Menggunakan pesan kustom untuk penghapusan semua laporan
+            if (safeConfirm("SEMUA data laporan yang tersimpan secara permanent.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                filterReports();
+                showToast("SEMUA data laporan berhasil dihapus permanent.", true);
+            } else {
+                 showToast("Penghapusan dibatalkan.", true);
+            }
+        }
+
+        function deleteFilteredReports() {
+             if (currentFilteredIDs.length === 0) {
+                showToast("Tidak ada laporan yang ditampilkan untuk dihapus.", true);
+                return;
+            }
+            // Menggunakan pesan kustom untuk penghapusan laporan terfilter
+            if (safeConfirm(`${currentFilteredIDs.length} laporan yang saat ini terfilter.`)) {
+                const allReports = getReports();
+                const reportsToKeep = allReports.filter(report => !currentFilteredIDs.includes(report.id));
+                
+                if (reportsToKeep.length < allReports.length) {
+                    saveReports(reportsToKeep);
+                    showToast(`${currentFilteredIDs.length} laporan berhasil dihapus.`, true);
+                }
+            } else {
+                showToast("Penghapusan dibatalkan.", true);
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Standby auto': return 'status-standby-auto';
+                case 'Standby on': return 'status-standby-on';
+                case 'Standby off': return 'status-standby-off';
+                case 'On': return 'status-on';
+                case 'Off': return 'status-off';
+                default: return 'bg-gray-200 text-gray-800';
+            }
+        }
+
+        function renderReports(reportsToRender) {
+            reportList.innerHTML = '';
+            currentFilteredIDs = []; 
+            
+            const reports = getReports(); 
+            reportCount.textContent = reports.length;
+            filteredCount.textContent = reportsToRender.length;
+            
+            const isFiltering = searchInput.value.length > 0;
+
+            if (reports.length === 0) {
+                noDataMessage.style.display = 'block';
+                noSearchResults.classList.add('hidden');
+                exportButton.disabled = true;
+                deleteAllButton.disabled = true;
+                deleteFilteredButton.disabled = true;
+                return;
+            } else {
+                noDataMessage.style.display = 'none';
+                exportButton.disabled = false;
+                deleteAllButton.disabled = false;
+                deleteFilteredButton.disabled = reportsToRender.length === 0;
+            }
+
+            if (isFiltering && reportsToRender.length === 0) {
+                noSearchResults.classList.remove('hidden');
+            } else {
+                 noSearchResults.classList.add('hidden');
+            }
+            
+            if (reportsToRender.length > 0) {
+                deleteFilteredButton.disabled = false;
+            }
+
+            reportsToRender.forEach(report => {
+                currentFilteredIDs.push(report.id); 
+                const statusClass = getStatusClass(report.status_unit);
+                const aksesorisDisplay = report.aksesoris && report.aksesoris.length > 0 ? report.aksesoris.join(', ') : ' - ';
+                const fotoListDisplay = report.foto_details.map(f => f.filename).join('; ');
+                const noteTemuanDisplay = report.note_temuan && report.note_temuan.trim() !== '' ? report.note_temuan : 'Tidak ada temuan.';
+                const kapasitasBreakerDisplay = report.kapasitas_breaker || 'N/A';
+                
+                const reportElement = document.createElement('div');
+                reportElement.className = 'bg-white app-card rounded-xl p-4 transition duration-200 border-l-4 border-blue-500';
+                
+                reportElement.innerHTML = `
+                    <div class="flex items-center justify-between mb-3 border-b pb-2">
+                        <div class="flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                            <h3 class="text-md font-bold text-gray-800">${report.tanggal}</h3>
+                        </div>
+                        <div class="px-3 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                            ${report.status_unit}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-y-2 text-sm text-gray-700">
+                        <div><span class="font-medium text-gray-600">No. Urut:</span> ${report.no_urut}</div>
+                        <div><span class="font-medium text-gray-600">Nama Unit:</span> ${report.nama_unit || 'N/A'}</div>
+                        <div><span class="font-medium text-gray-600">PIC:</span> ${report.pic}</div>
+                        <div><span class="font-medium text-gray-600">Voltage (V / VDC):</span> ${report.tegangan}</div>
+                        <div><span class="font-medium text-gray-600">Ampere ( R/S/T):</span> ${report.ampere}</div>
+                        <div><span class="font-medium text-gray-600">Suhu:</span> ${report.suhu}°C</div>
+                        <div><span class="font-medium text-gray-600">Pressure:</span> ${report.tekanan}</div>
+                        <div><span class="font-medium text-gray-600">Breaker:</span> ${kapasitasBreakerDisplay}</div>
+                        <div class="col-span-2"><span class="font-medium text-gray-600">Aksesoris:</span> ${aksesorisDisplay}</div>
+                        <div class="col-span-2 text-xs pt-2 border-t mt-2"><span class="font-semibold text-gray-800">Note/Temuan:</span> ${noteTemuanDisplay}</div>
+                    </div>
+                    
+                    <div class="mt-3 pt-3 border-t border-dashed border-gray-200 flex justify-between items-center text-xs">
+                        <div class="text-gray-500 overflow-hidden truncate max-w-[70%]">
+                            Foto (${report.foto_details.length}): <span class="text-blue-600 font-medium">${fotoListDisplay}</span>
+                        </div>
+                        <button data-id="${report.id}" class="delete-btn text-red-500 hover:text-red-700 font-medium transition duration-150">
+                            Hapus
+                        </button>
+                    </div>
+                `;
+                reportList.appendChild(reportElement);
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    deleteReport(id);
+                });
+            });
+        }
+        
+        function filterReports() {
+            const reports = getReports();
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            if (!searchTerm) {
+                renderReports(reports);
+                return;
+            }
+
+            // Memperluas pencarian untuk mencakup Nama Unit
+            const filteredReports = reports.filter(report => 
+                report.no_urut.toLowerCase().includes(searchTerm) ||
+                (report.nama_unit && report.nama_unit.toLowerCase().includes(searchTerm)) || // Filter Nama Unit
+                report.pic.toLowerCase().includes(searchTerm) ||
+                (report.kapasitas_breaker && report.kapasitas_breaker.toLowerCase().includes(searchTerm)) || 
+                (report.aksesoris && report.aksesoris.some(acc => acc.toLowerCase().includes(searchTerm))) ||
+                (report.note_temuan && report.note_temuan.toLowerCase().includes(searchTerm)) 
+            );
+
+            renderReports(filteredReports);
+        }
+
+        function formatReportsForWhatsApp(data) {
+            if (data.length === 0) return "Tidak ada data laporan FMS yang tersimpan untuk dikirim.";
+
+            let text = `*LAPORAN PREVENTIF FMS* (%0A%0A`;
+            text += `Total ${data.length} data tersimpan secara lokal.%0A`;
+            text += `Waktu Kirim: ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}%0A%0A`;
+
+            data.forEach((report, index) => {
+                const separator = index < data.length - 1 ? '%0A------------------%0A' : '';
+                const accessories = report.aksesoris && report.aksesoris.length > 0 ? report.aksesoris.join(', ') : 'Tidak ada';
+                const photoSummary = report.foto_details.map(f => f.filename).join('; ');
+                const noteTemuan = report.note_temuan && report.note_temuan.trim() !== '' ? report.note_temuan : ' - '; 
+                const kapasitasBreaker = report.kapasitas_breaker || 'N/A'; // Ambil nilai Kapasitas Breaker
+                
+                // Menyertakan Nama Unit dan Kapasitas Breaker di ringkasan
+                text += `*${index + 1}. No. Urut: ${report.no_urut}* (Unit: ${report.nama_unit || 'N/A'}) (PIC: ${report.pic})%0A`;
+                text += `   Tgl: ${report.tanggal}%0A`;
+                text += `   Status: ${report.status_unit}%0A`;
+                text += `   Aksesoris: ${accessories}%0A`;
+                // Data Teknis di ringkasan WA
+                text += `   Data: Ampere (R/S/T): ${report.ampere} | Voltage: ${report.tegangan} | Suhu: ${report.suhu}°C | Pressure: ${report.tekanan} | Breaker: ${kapasitasBreaker}%0A`;
+                text += `   Temuan: ${noteTemuan}%0A`; 
+                text += `   File Foto (${report.foto_details.length}): ${photoSummary}%0A`;
+                text += separator;
+            });
+
+            return text;
+        }
+
+        exportButton.addEventListener('click', function() {
+            const reports = getReports();
+            if (reports.length === 0) {
+                showToast("Tidak ada data untuk dikirim.", true);
+                return;
+            }
+
+            const whatsappMessage = formatReportsForWhatsApp(reports);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
+            window.open(whatsappUrl, '_blank');
+            
+            showToast("Membuka WhatsApp... Pastikan Anda mengirimkan pesannya.");
+        });
+
+        // Event Listeners
+        deleteAllButton.addEventListener('click', deleteAllReports);
+        deleteFilteredButton.addEventListener('click', deleteFilteredReports);
+        searchInput.addEventListener('input', filterReports);
+
+
+        // INISIALISASI
+        document.addEventListener('DOMContentLoaded', () => {
+            filterReports(); 
+            document.getElementById('tanggal').valueAsDate = new Date();
+            updatePhotoPreview(); 
+        });
+        
+    </script>
+</body>
+</html>
